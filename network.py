@@ -47,8 +47,9 @@ class Feature_Extraction(nn.Module):
             return x
 
         elif(mode == 'single'):
-            return self.layer1(imgs)
-
+            x1 = self.layer1(imgs)
+            x2 = self.layer2(x1)
+            return self.layer3(x2)
 
 class SAFF(nn.Module):
     def __init__(self, a=0.5, b=2, sigma=0.0001):
