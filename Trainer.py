@@ -33,11 +33,11 @@ class Trainer:
     def feature_extract(self):
         outputs = []
         labels = []
-        print("进行特征提取...")
+        print("perform feature extraction...")
         for inputs, targets in tqdm(self.dl, ncols=90):
             inputs = inputs.to(self.device)
             targets = targets.numpy()
-            output = self.net(inputs).detach().cpu().numpy()
+            output = self.net(inputs,self.args).detach().cpu().numpy()
             outputs.append(output)
             labels.append(targets)
 
@@ -48,15 +48,15 @@ class Trainer:
         io.savemat('results/%s.mat' % self.args.dataset, data)
 
     def train(self):
-        print("数据集: ", self.args.dataset)
+        print("Dataset: ", self.args.dataset)
         print("train ratio: ", self.args.ratio)
 
-        print("读取数据集...")
+        print("read dataset...")
         data = io.loadmat('results/%s.mat' % self.args.dataset)
         X, y = data['X'], data['y'].squeeze()
-        print("pca降维...")
+        print("pca dimension reduction...")
         X = self.pca.fit_transform(X)
-        print("划分数据集...")
+        print("Divide the dataset...")
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=self.args.ratio)
         self.svm.fit(X_train, y_train)
         pred = self.svm.predict(X_test)

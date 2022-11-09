@@ -35,16 +35,19 @@ class Feature_Extraction(nn.Module):
         self.maxpool4 = nn.MaxPool2d(kernel_size=2, stride=4, padding=0)
         self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
 
-    def forward(self, imgs):
-        x1 = self.layer1(imgs)
-        x2 = self.layer2(x1)
-        x3 = self.layer3(x2)
-        new_x1 = x3
-        new_x2 = self.maxpool2(x2)
-        new_x3 = self.maxpool4(x1)
-        x = torch.cat([new_x1, new_x2, new_x3], dim=1)
+    def forward(self, imgs, mode):
+        if(mode == 'full'):
+            x1 = self.layer1(imgs)
+            x2 = self.layer2(x1)
+            x3 = self.layer3(x2)
+            new_x1 = x3
+            new_x2 = self.maxpool2(x2)
+            new_x3 = self.maxpool4(x1)
+            x = torch.cat([new_x1, new_x2, new_x3], dim=1)
+            return x
 
-        return x
+        elif(mode == 'single'):
+            return self.layer1(imgs)
 
 
 class SAFF(nn.Module):
@@ -80,8 +83,8 @@ class Model(nn.Module):
         self.feature_extract = Feature_Extraction(args)
         self.saff = SAFF()
 
-    def forward(self, img):
+    def forward(self, img, args):
 
-        x = self.feature_extract(img)
+        x = self.feature_extract(img, args.mode)
         x = self.saff(x)
         return x
