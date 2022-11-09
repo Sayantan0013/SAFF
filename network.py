@@ -36,7 +36,7 @@ class Feature_Extraction(nn.Module):
         self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
 
     def forward(self, imgs, mode):
-        if(mode == 'full'):
+        if(mode == 'full' or mode == 'sum'):
             x1 = self.layer1(imgs)
             x2 = self.layer2(x1)
             x3 = self.layer3(x2)
@@ -57,24 +57,27 @@ class SAFF(nn.Module):
         self.b = b
         self.sigma = sigma
 
-    def forward(self, x):
+    def forward(self, x, mode):
         """
         :param x: (n, c, h, w)
         :return:
         """
-        n, K, h, w = x.shape
-        S = x.sum(dim=1)  # n,h,w
-        z = torch.sum(S ** self.a, dim=[1, 2])
-        z = (z ** (1 / self.a)).view(n, 1, 1)
-        S = (S / z) ** (1 / self.b)
-        S = S.unsqueeze(1)
-        new_x = (x * S).sum(dim=[2, 3])
-        omg = (x > 0).sum(dim=[2, 3]) / (256 ** 2)
-        omg_sum = omg.sum(dim=1).unsqueeze(1)
-        omg = (K * self.sigma + omg_sum) / (self.sigma + omg)
-        omg = torch.log(omg)
-        x = omg * new_x
-        return x
+        if(mode == 'full' or mode == 'single'):
+            n, K, h, w = x.shape
+            S = x.sum(dim=1)  # n,h,w
+            z = torch.sum(S ** self.a, dim=[1, 2])
+            z = (z ** (1 / self.a)).view(n, 1, 1)
+            S = (S / z) ** (1 / self.b)
+            S = S.unsqueeze(1)
+            new_x = (x * S).sum(dim=[2, 3])
+            omg = (x > 0).sum(dim=[2, 3]) / (256 ** 2)
+            omg_sum = omg.sum(dim=1).unsqueeze(1)
+            omg = (K * self.sigma + omg_sum) / (self.sigma + omg)
+            omg = torch.log(omg)
+            x = omg * new_x
+            return x
+        elif(mode == 'sum'):
+            return x.sum(dim=[2, 3])
 
 
 class Model(nn.Module):
@@ -86,5 +89,5 @@ class Model(nn.Module):
     def forward(self, img, args):
 
         x = self.feature_extract(img, args.mode)
-        x = self.saff(x)
+        x = self.saff(x, args.mode)
         return x
