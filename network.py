@@ -1,4 +1,5 @@
 from torchvision.models import vgg16
+from torchvision.models import alexnet
 import torch.nn as nn
 import torch
 
@@ -8,7 +9,9 @@ def get_conv(start, end, model='vgg16'):
     if model == 'vgg16':
         net = vgg16(pretrained=True)
         return net.features[start:end]
-
+    elif model == 'alexnet':
+        net = alexnet(pretrained=True)
+        return net.features[start:end]
     return None
 
 
@@ -28,12 +31,20 @@ class BackBone(nn.Module):
 class Feature_Extraction(nn.Module):
     def __init__(self, args):
         super(Feature_Extraction, self).__init__()
-        self.layer1 = get_conv(0, 19, args.model)
-        self.layer2 = get_conv(19, 26, args.model)
-        self.layer3 = get_conv(26, 31, args.model)
+        if(args.model == 'vgg16'):
+            self.layer1 = get_conv(0, 19, args.model)
+            self.layer2 = get_conv(19, 26, args.model)
+            self.layer3 = get_conv(26, 31, args.model)
 
-        self.maxpool4 = nn.MaxPool2d(kernel_size=2, stride=4, padding=0)
-        self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+            self.maxpool4 = nn.MaxPool2d(kernel_size=2, stride=4, padding=0)
+            self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        elif(args.model == 'alexnet'):
+            self.layer1 = get_conv(6, 8, args.model)
+            self.layer2 = get_conv(8, 10, args.model)
+            self.layer3 = get_conv(10, 12, args.model)
+
+            self.maxpool4 = nn.MaxPool2d(kernel_size=1, stride=1, padding=0)
+            self.maxpool2 = nn.MaxPool2d(kernel_size=1, stride=1, padding=0)
 
     def forward(self, imgs, mode):
         if(mode == 'full' or mode == 'sum'):
