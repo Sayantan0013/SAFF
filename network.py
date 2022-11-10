@@ -39,7 +39,7 @@ class Feature_Extraction(nn.Module):
             self.maxpool4 = nn.MaxPool2d(kernel_size=2, stride=4, padding=0)
             self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         elif(args.model == 'alexnet'):
-            self.layer1 = get_conv(6, 8, args.model)
+            self.layer1 = get_conv(0, 8, args.model)
             self.layer2 = get_conv(8, 10, args.model)
             self.layer3 = get_conv(10, 12, args.model)
 
