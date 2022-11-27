@@ -19,7 +19,7 @@ class PCA:
 		no_rows, no_columns = t.size()
 		row_means = torch.mean(t, 1)
 		#Expand the matrix in order to have the same shape as X and substract, to center
-		for_subtraction = row_means.expand(no_rows, no_columns)
+		for_subtraction = row_means.unsqueeze(1)
 		X = t - for_subtraction #centered
 		return(X)
 
