@@ -12,7 +12,10 @@ class PCA:
 	@staticmethod
 	def Center(Data):
 		#Convert to torch Tensor and keep the number of rows and columns
-		t = torch.from_numpy(Data)
+		if(type(Data)==np.ndarray):
+			t = torch.from_numpy(Data)
+		else:
+			t = Data
 		no_rows, no_columns = t.size()
 		row_means = torch.mean(t, 1)
 		#Expand the matrix in order to have the same shape as X and substract, to center
@@ -26,7 +29,7 @@ class PCA:
 		X = cls.Center(Data)
 		U,S,V = torch.svd(X)
 		eigvecs=U.t()[:,:k] #the first k vectors will be kept
-		y=torch.mm(U,eigvecs)
+		y=torch.mm(X,eigvecs)
 
 		#Save variables to the class object, the eigenpair and the centered data
 		cls.eigenpair = (eigvecs, S)
