@@ -30,6 +30,7 @@ class PCA:
 		U,S,V = torch.svd(X)
 		eigvecs=U.t()[:,:k] #the first k vectors will be kept
 		y=torch.mm(X,eigvecs)
+		np.save('results/eigvecs',eigvecs)
 
 		#Save variables to the class object, the eigenpair and the centered data
 		cls.eigenpair = (eigvecs, S)

@@ -5,11 +5,12 @@ import torch.nn as nn
 from sklearn.svm import SVC
 import numpy as np
 from sklearn.metrics import accuracy_score
-from sklearn.decomposition import PCA
+# from sklearn.decomposition import PCA
 from sklearn import manifold
 from sklearn.model_selection import train_test_split
 import scipy.io as io
 from tqdm import tqdm
+from TorchPCA import PCA
 
 
 class Trainer:
@@ -23,7 +24,8 @@ class Trainer:
         self.net = Model(self.args).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), )
         self.svm = SVC(kernel='rbf')
-        self.pca = PCA(n_components=self.args.K)
+        self.pca = PCA([])
+        # self.pca = PCA(n_components=self.args.K)
         # self.pca = manifold.TSNE(n_components=self.args.K, init='pca')
 
     def _init_data(self):
@@ -55,7 +57,7 @@ class Trainer:
         data = io.loadmat('results/%s.mat' % self.args.dataset)
         X, y = data['X'], data['y'].squeeze()
         print("pca dimension reduction...")
-        X = self.pca.fit_transform(X)
+        X = self.pca.Decomposition(X,self.args.K)
         print("Divide the dataset...")
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=self.args.ratio)
         self.svm.fit(X_train, y_train)
